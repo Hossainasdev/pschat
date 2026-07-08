@@ -4,6 +4,8 @@ node_modules/
 *.db-shm
 data.json
 .env
+.env.production
+.env.local
 public/uploads/*
 !public/uploads/.gitkeep
 .data/
