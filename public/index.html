@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>ChatWave</title>
+<link rel="stylesheet" href="/css/style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+<div id="app">
+  <!-- SIDEBAR -->
+  <div id="sidebar">
+    <div class="sidebar-header">
+      <h2><i class="fas fa-comments"></i> ChatWave</h2>
+      <div class="header-actions">
+        <button id="searchToggle" class="icon-btn" title="Search"><i class="fas fa-search"></i></button>
+        <button id="themeToggle" class="icon-btn" title="Theme"><i class="fas fa-moon"></i></button>
+        <button id="newRoomBtn" class="icon-btn" title="Create"><i class="fas fa-plus-circle"></i></button>
+      </div>
+    </div>
+    <div id="searchBar" class="hidden search-bar">
+      <i class="fas fa-search"></i>
+      <input type="text" id="globalSearch" placeholder="Search rooms, users, messages..." autocomplete="off">
+      <button id="clearSearch" class="icon-btn"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="sidebar-tabs">
+      <button class="tab-btn active" data-tab="chats"><i class="fas fa-comment-dots"></i> Chats</button>
+      <button class="tab-btn" data-tab="rooms"><i class="fas fa-layer-group"></i> Rooms</button>
+      <button class="tab-btn" data-tab="people"><i class="fas fa-users"></i> People</button>
+      <button class="tab-btn" data-tab="more"><i class="fas fa-ellipsis-h"></i></button>
+    </div>
+    <div id="chatList" class="sidebar-content active"></div>
+    <div id="roomList" class="sidebar-content"></div>
+    <div id="peopleList" class="sidebar-content"></div>
+    <div id="morePanel" class="sidebar-content">
+      <div class="more-menu">
+        <div class="more-item" data-action="bookmarks"><i class="fas fa-bookmark"></i> Bookmarks <span id="bookmarkCount" class="badge hidden">0</span></div>
+        <div class="more-item" data-action="gallery"><i class="fas fa-images"></i> Media Gallery</div>
+        <div class="more-item" data-action="streaks"><i class="fas fa-fire"></i> Streaks <span id="streakBadge" class="badge">0</span></div>
+        <div class="more-item" data-action="shortcuts"><i class="fas fa-keyboard"></i> Shortcuts</div>
+        <div class="more-item" data-action="settings"><i class="fas fa-cog"></i> Settings</div>
+        <div class="more-item" data-action="feedback"><i class="fas fa-bug"></i> Feedback</div>
+        <div class="more-item" data-action="help"><i class="fas fa-question-circle"></i> Help</div>
+      </div>
+    </div>
+    <div class="sidebar-footer">
+      <div class="footer-left">
+        <div id="userAvatar" class="mini-avatar">U</div>
+        <div class="footer-info">
+          <span id="myName"></span>
+          <span id="myStatus" class="status-text"></span>
+        </div>
+      </div>
+      <div class="footer-right">
+        <button id="statusBtn" class="icon-btn" title="Set Status"><i class="fas fa-circle"></i></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div id="mainArea">
+    <div id="connectionBar" class="hidden connection-bar"><i class="fas fa-wifi"></i> Reconnecting...</div>
+
+    <div id="welcomeScreen" class="welcome">
+      <div class="welcome-content">
+        <i class="fas fa-comments welcome-icon"></i>
+        <h1>ChatWave</h1>
+        <p>Select a chat or create a room</p>
+        <div class="welcome-quick">
+          <button id="quickCreateBtn" class="btn-primary" style="width:auto;padding:10px 24px;"><i class="fas fa-plus"></i> Create Room</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="chatView" class="hidden">
+      <div id="chatHeader">
+        <div class="chat-header-info">
+          <div class="ch-avatar" id="chAvatar">#</div>
+          <div>
+            <h3><span id="roomName"></span> <span id="roomBadge"></span></h3>
+            <div id="chatMeta"></div>
+          </div>
+        </div>
+        <div class="chat-header-actions" id="chatActions">
+          <button id="voiceCallBtn" class="icon-btn" title="Voice Call"><i class="fas fa-phone"></i></button>
+          <button id="videoCallBtn" class="icon-btn" title="Video Call"><i class="fas fa-video"></i></button>
+          <button id="roomInfoBtn" class="icon-btn" title="Room Info"><i class="fas fa-info-circle"></i></button>
+        </div>
+      </div>
+
+      <div id="pinnedBar" class="hidden pinned-bar">
+        <i class="fas fa-thumbtack"></i>
+        <span id="pinnedText">Pinned message</span>
+        <button id="unpinBtn" class="icon-btn"><i class="fas fa-times"></i></button>
+      </div>
+
+      <div id="bannerBar" class="hidden banner-bar">
+        <span id="bannerText"></span>
+      </div>
+
+      <div id="searchResultsBar" class="hidden search-results-bar">
+        <i class="fas fa-search"></i>
+        <span id="searchResultsInfo">Search results</span>
+        <button id="closeSearchResults" class="icon-btn"><i class="fas fa-times"></i></button>
+      </div>
+
+      <div id="messagesArea"></div>
+
+      <div id="replyPreview" class="hidden reply-preview">
+        <div class="reply-info">
+          <i class="fas fa-reply"></i>
+          <span id="replyUsername">Replying</span>
+          <span id="replyText"></span>
+        </div>
+        <button id="cancelReply" class="icon-btn"><i class="fas fa-times"></i></button>
+      </div>
+
+      <div id="typingIndicator" class="hidden typing-indicator"><span></span><span></span><span></span> <span id="typingText"></span></div>
+
+      <div id="inputArea">
+        <div class="input-tools">
+          <button id="emojiBtn" class="icon-btn" title="Emoji"><i class="fas fa-smile"></i></button>
+          <button id="fileBtn" class="icon-btn" title="Attach"><i class="fas fa-paperclip"></i></button>
+          <button id="voiceBtn" class="icon-btn" title="Voice"><i class="fas fa-microphone"></i></button>
+          <button id="pollBtn" class="icon-btn" title="Poll"><i class="fas fa-poll"></i></button>
+        </div>
+        <div class="input-wrap">
+          <input type="text" id="messageInput" placeholder="Type a message..." autocomplete="off" maxlength="5000">
+          <span id="charCount" class="char-count"></span>
+        </div>
+        <button id="sendBtn" class="send-btn"><i class="fas fa-paper-plane"></i></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODALS -->
+
+<!-- Room Create -->
+<div id="roomModal" class="modal hidden">
+  <div class="modal-content"><div class="modal-header"><h3>Create Room</h3><button class="modal-close">&times;</button></div>
+    <input type="text" id="roomNameInput" placeholder="Room name..." maxlength="40">
+    <select id="roomTypeSelect"><option value="public">Public</option><option value="private">Private</option></select>
+    <input type="text" id="roomDescInput" placeholder="Description (optional)" maxlength="200">
+    <input type="text" id="roomWelcomeInput" placeholder="Welcome message (optional)" maxlength="200">
+    <button id="createRoomSubmit" class="btn-primary">Create Room</button>
+  </div>
+</div>
+
+<!-- Room Info -->
+<div id="roomInfoModal" class="modal hidden">
+  <div class="modal-content"><div class="modal-header"><h3 id="roomInfoTitle">Room Info</h3><button class="modal-close">&times;</button></div>
+    <div id="roomInfoContent"></div>
+  </div>
+</div>
+
+<!-- Settings -->
+<div id="settingsModal" class="modal hidden">
+  <div class="modal-content settings-content"><div class="modal-header"><h3>Settings</h3><button class="modal-close">&times;</button></div>
+    <div class="setting-group">
+      <label>Chat Background</label>
+      <div class="bg-options">
+        <div class="bg-option active" data-bg="default">Default</div>
+        <div class="bg-option" data-bg="#1a1a2e">Dark</div>
+        <div class="bg-option" data-bg="#16213e">Navy</div>
+        <div class="bg-option" data-bg="#0f3460">Deep</div>
+        <div class="bg-option" data-bg="#2d2d2d">Gray</div>
+        <div class="bg-option" data-bg="url('https://www.transparenttextures.com/patterns/cubes.png')">Pattern</div>
+      </div>
+    </div>
+    <div class="setting-group">
+      <label>Font Size: <span id="fontSizeLabel">14px</span></label>
+      <input type="range" id="fontSizeSlider" min="12" max="24" value="14" class="slider">
+    </div>
+    <div class="setting-group">
+      <label><input type="checkbox" id="time24h"> 24-hour format</label>
+    </div>
+    <div class="setting-group">
+      <label><input type="checkbox" id="enterSend" checked> Enter to send</label>
+    </div>
+    <div class="setting-group">
+      <label><input type="checkbox" id="notifSound" checked> Notification sounds</label>
+    </div>
+    <div class="setting-group">
+      <label><input type="checkbox" id="showTyping" checked> Show typing indicators</label>
+    </div>
+  </div>
+</div>
+
+<!-- Poll -->
+<div id="pollModal" class="modal hidden">
+  <div class="modal-content"><div class="modal-header"><h3>Create Poll</h3><button class="modal-close">&times;</button></div>
+    <input type="text" id="pollQuestion" placeholder="Question..." maxlength="200">
+    <div id="pollOptions">
+      <input type="text" class="poll-option" placeholder="Option 1" maxlength="100">
+      <input type="text" class="poll-option" placeholder="Option 2" maxlength="100">
+    </div>
+    <button id="addPollOption" class="btn-secondary" style="width:100%;margin-bottom:12px;padding:8px;background:var(--bg-tertiary);border:1px dashed var(--border);border-radius:8px;color:var(--text-secondary);cursor:pointer;">+ Add Option</button>
+    <button id="createPollSubmit" class="btn-primary">Create Poll</button>
+  </div>
+</div>
+
+<!-- Call -->
+<div id="callModal" class="modal hidden">
+  <div class="modal-content call-modal">
+    <div id="callStatus"><i class="fas fa-phone-alt call-icon"></i><h3 id="callStatusText">Calling...</h3><p id="callWithName"></p></div>
+    <div id="videoContainer" class="hidden"><video id="remoteVideo" autoplay playsinline></video><video id="localVideo" autoplay playsinline muted></video></div>
+    <div class="call-actions">
+      <button id="acceptCallBtn" class="call-btn accept hidden"><i class="fas fa-phone"></i> Accept</button>
+      <button id="rejectCallBtn" class="call-btn reject"><i class="fas fa-phone-slash"></i> End</button>
+      <button id="muteCallBtn" class="call-btn secondary hidden"><i class="fas fa-microphone"></i></button>
+      <button id="speakerBtn" class="call-btn secondary hidden"><i class="fas fa-volume-up"></i></button>
+    </div>
+  </div>
+</div>
+
+<!-- Emoji Picker -->
+<div id="emojiPicker" class="hidden emoji-picker">
+  <div class="emoji-tabs"><button class="emoji-tab active" data-cat="smileys">😀</button><button class="emoji-tab" data-cat="people">👋</button><button class="emoji-tab" data-cat="animals">🐱</button><button class="emoji-tab" data-cat="food">🍕</button><button class="emoji-tab" data-cat="activities">⚽</button><button class="emoji-tab" data-cat="objects">💡</button></div>
+  <div id="emojiGrid" class="emoji-grid"></div>
+</div>
+
+<!-- Reaction Picker -->
+<div id="reactionPicker" class="hidden reaction-picker">
+  <span data-emoji="👍">👍</span><span data-emoji="❤️">❤️</span><span data-emoji="😂">😂</span>
+  <span data-emoji="😮">😮</span><span data-emoji="😢">😢</span><span data-emoji="🙏">🙏</span>
+  <span data-emoji="🔥">🔥</span><span data-emoji="🎉">🎉</span><span data-emoji="👏">👏</span>
+  <span data-emoji="💯">💯</span><span data-emoji="⭐">⭐</span><span data-emoji="❓">❓</span>
+  <span data-emoji="✅">✅</span><span data-emoji="🚀">🚀</span><span data-emoji="👀">👀</span>
+</div>
+
+<!-- Context Menu -->
+<div id="contextMenu" class="hidden context-menu">
+  <div class="context-item" data-action="reply"><i class="fas fa-reply"></i> Reply</div>
+  <div class="context-item" data-action="copy"><i class="fas fa-copy"></i> Copy</div>
+  <div class="context-item" data-action="forward"><i class="fas fa-share"></i> Forward</div>
+  <div class="context-item" data-action="edit"><i class="fas fa-edit"></i> Edit</div>
+  <div class="context-item" data-action="bookmark"><i class="fas fa-bookmark"></i> Bookmark</div>
+  <div class="context-item" data-action="pin"><i class="fas fa-thumbtack"></i> Pin</div>
+  <div class="context-item" data-action="report"><i class="fas fa-flag"></i> Report</div>
+  <div class="context-item danger" data-action="delete"><i class="fas fa-trash"></i> Delete</div>
+</div>
+
+<!-- Forward Modal -->
+<div id="forwardModal" class="modal hidden">
+  <div class="modal-content"><div class="modal-header"><h3>Forward Message</h3><button class="modal-close">&times;</button></div>
+    <div id="forwardRoomList"></div>
+  </div>
+</div>
+
+<!-- Gallery Modal -->
+<div id="galleryModal" class="modal hidden">
+  <div class="modal-content gallery-content"><div class="modal-header"><h3>Media Gallery</h3><button class="modal-close">&times;</button></div>
+    <div id="galleryGrid" class="gallery-grid"></div>
+  </div>
+</div>
+
+<!-- Bookmarks Modal -->
+<div id="bookmarksModal" class="modal hidden">
+  <div class="modal-content"><div class="modal-header"><h3><i class="fas fa-bookmark"></i> Bookmarks</h3><button class="modal-close">&times;</button></div>
+    <div id="bookmarksList"></div>
+  </div>
+</div>
+
+<!-- Shortcuts Modal -->
+<div id="shortcutsModal" class="modal hidden">
+  <div class="modal-content"><div class="modal-header"><h3><i class="fas fa-keyboard"></i> Keyboard Shortcuts</h3><button class="modal-close">&times;</button></div>
+    <div class="shortcuts-grid">
+      <div><kbd>Enter</kbd> Send message</div>
+      <div><kbd>Shift+Enter</kbd> New line</div>
+      <div><kbd>Ctrl+K</kbd> Search</div>
+      <div><kbd>Escape</kbd> Close modal</div>
+      <div><kbd>Ctrl+N</kbd> New room</div>
+      <div><kbd>Ctrl+Shift+M</kbd> Mute room</div>
+      <div><kbd>Ctrl+Up</kbd> Edit last message</div>
+      <div><kbd>/</kbd> Commands</div>
+    </div>
+  </div>
+</div>
+
+<!-- Feedback Modal -->
+<div id="feedbackModal" class="modal hidden">
+  <div class="modal-content"><div class="modal-header"><h3>Send Feedback</h3><button class="modal-close">&times;</button></div>
+    <select id="feedbackType"><option value="general">General</option><option value="bug">Bug Report</option><option value="feature">Feature Request</option></select>
+    <textarea id="feedbackText" rows="4" placeholder="Describe your feedback..." maxlength="1000" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;background:var(--bg-tertiary);color:var(--text-primary);margin:12px 0;resize:vertical;"></textarea>
+    <button id="submitFeedback" class="btn-primary">Submit</button>
+  </div>
+</div>
+
+<!-- Status Modal -->
+<div id="statusModal" class="modal hidden">
+  <div class="modal-content"><div class="modal-header"><h3>Set Status</h3><button class="modal-close">&times;</button></div>
+    <div class="status-options">
+      <div class="status-option" data-status="online"><span class="s-dot" style="background:#2ecc71"></span> Online</div>
+      <div class="status-option" data-status="away"><span class="s-dot" style="background:#f39c12"></span> Away</div>
+      <div class="status-option" data-status="busy"><span class="s-dot" style="background:#e74c3c"></span> Busy</div>
+      <div class="status-option" data-status="invisible"><span class="s-dot" style="background:#95a5a6"></span> Invisible</div>
+    </div>
+    <input type="text" id="customStatusInput" placeholder="Custom status..." maxlength="60">
+    <button id="setStatusBtn" class="btn-primary">Set</button>
+  </div>
+</div>
+
+<!-- Confirm Modal -->
+<div id="confirmModal" class="modal hidden">
+  <div class="modal-content" style="width:320px;"><div class="modal-header"><h3 id="confirmTitle">Confirm</h3><button class="modal-close">&times;</button></div>
+    <p id="confirmText" style="margin:12px 0;color:var(--text-secondary);"></p>
+    <div style="display:flex;gap:8px;">
+      <button id="confirmYes" class="btn-primary" style="background:var(--danger);">Yes</button>
+      <button id="confirmNo" class="btn-primary" style="background:var(--bg-tertiary);color:var(--text-primary);">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script src="/js/config.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
+<script src="/js/firebase-backend.js"></script>
+<script src="/socket.io/socket.io.js"></script>
+<script src="/js/app.js"></script>
+</body>
+</html>

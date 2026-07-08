@@ -1,0 +1,13 @@
+node_modules/
+*.db
+*.db-wal
+*.db-shm
+data.json
+.env
+public/uploads/*
+!public/uploads/.gitkeep
+.data/
+fly.toml
+render.yaml
+wrangler.toml
+*.log

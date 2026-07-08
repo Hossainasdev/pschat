@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    container_name: chatwave
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    volumes:
+      - chatwave-uploads:/app/public/uploads
+      - chatwave-data:/app/data
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - DB_PATH=/app/data/chatwave.db
+      - ADMIN_USER=${ADMIN_USER:-hoss@host}
+      - ADMIN_PASS=${ADMIN_PASS:-@hostopenit}
+      - CORS_ORIGIN=${CORS_ORIGIN:-https://chatwave.yourdomain.com}
+      - SOCKET_SERVER_URL=${SOCKET_SERVER_URL:-}
+    networks:
+      - chatwave-net
+
+  tunnel:
+    image: cloudflare/cloudflared:latest
+    container_name: chatwave-tunnel
+    restart: unless-stopped
+    command: tunnel --no-autoupdate run
+    environment:
+      - TUNNEL_TOKEN=${CLOUDFLARE_TUNNEL_TOKEN}
+    depends_on:
+      - app
+    networks:
+      - chatwave-net
+
+volumes:
+  chatwave-uploads:
+  chatwave-data:
+
+networks:
+  chatwave-net:
+    driver: bridge

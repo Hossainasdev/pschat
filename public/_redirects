@@ -1,0 +1,7 @@
+# Proxy API routes to the Worker
+/api/* https://chatwave.yourdomain.com 200
+/ws wss://chatwave.yourdomain.com 200
+
+# Admin panel route
+/host /admin/index.html 200
+/host/* /admin/index.html 200

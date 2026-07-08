@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin - ChatWave</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0a0a0f; color: #e8e8f0; min-height: 100vh; }
+::-webkit-scrollbar { width:5px; }
+::-webkit-scrollbar-track { background:transparent; }
+::-webkit-scrollbar-thumb { background:#2a2a45; border-radius:3px; }
+
+#loginPage { display:flex; align-items:center; justify-content:center; min-height:100vh; background:radial-gradient(ellipse at center, #14141f 0%, #0a0a0f 100%); }
+.login-box { background:#14141f; padding:40px; border-radius:16px; border:1px solid #2a2a45; width:380px; max-width:90vw; box-shadow:0 20px 60px rgba(0,0,0,0.5); }
+.login-box h1 { text-align:center; margin-bottom:4px; color:#6c5ce7; font-size:22px; }
+.login-box p { text-align:center; color:#a0a0b8; margin-bottom:24px; font-size:13px; }
+.login-box input { width:100%; padding:12px 16px; margin-bottom:12px; border:1px solid #2a2a45; border-radius:8px; background:#1e1e30; color:#e8e8f0; font-size:14px; outline:none; }
+.login-box input:focus { border-color:#6c5ce7; box-shadow:0 0 0 2px rgba(108,92,231,0.3); }
+.login-box button { width:100%; padding:12px; border:none; border-radius:8px; background:#6c5ce7; color:#fff; font-size:15px; font-weight:600; cursor:pointer; }
+.login-box button:hover { background:#7c6cf7; }
+.login-error { color:#e74c3c; text-align:center; margin-top:10px; font-size:13px; display:none; }
+.shield-icon { text-align:center; font-size:48px; color:#6c5ce7; margin-bottom:12px; }
+
+#dashboard { display:none; }
+.top-bar { background:#14141f; padding:14px 20px; border-bottom:1px solid #2a2a45; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:100; flex-wrap:wrap; gap:8px; }
+.top-bar h2 { color:#6c5ce7; font-size:18px; white-space:nowrap; }
+.top-bar h2 i { margin-right:8px; }
+.top-bar .stats { display:flex; gap:16px; font-size:12px; color:#a0a0b8; flex-wrap:wrap; }
+.top-bar .stats span { color:#e8e8f0; font-weight:600; }
+.logout-btn { background:transparent; border:1px solid #2a2a45; color:#e8e8f0; padding:7px 14px; border-radius:8px; cursor:pointer; font-size:12px; white-space:nowrap; }
+.logout-btn:hover { border-color:#e74c3c; color:#e74c3c; }
+
+.dashboard-nav { background:#14141f; padding:0 20px; border-bottom:1px solid #2a2a45; display:flex; gap:0; overflow-x:auto; }
+.dashboard-nav button { padding:12px 16px; background:transparent; border:none; color:#a0a0b8; cursor:pointer; font-size:12px; border-bottom:2px solid transparent; white-space:nowrap; flex-shrink:0; }
+.dashboard-nav button:hover { color:#e8e8f0; background:#1e1e30; }
+.dashboard-nav button.active { color:#6c5ce7; border-bottom-color:#6c5ce7; }
+
+.dashboard-content { padding:20px; }
+.dashboard-panel { display:none; }
+.dashboard-panel.active { display:block; }
+
+.card { background:#14141f; border:1px solid #2a2a45; border-radius:10px; padding:16px; margin-bottom:14px; }
+.card h3 { font-size:12px; color:#a0a0b8; margin-bottom:10px; text-transform:uppercase; letter-spacing:1px; }
+
+.stat-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(150px,1fr)); gap:12px; margin-bottom:20px; }
+.stat-card { background:#14141f; border:1px solid #2a2a45; border-radius:10px; padding:18px; text-align:center; }
+.stat-card .num { font-size:30px; font-weight:700; color:#6c5ce7; }
+.stat-card .label { font-size:11px; color:#a0a0b8; margin-top:2px; }
+
+.data-table { width:100%; border-collapse:collapse; font-size:12px; }
+.data-table th { text-align:left; padding:8px 10px; border-bottom:1px solid #2a2a45; color:#a0a0b8; font-weight:600; font-size:10px; text-transform:uppercase; letter-spacing:1px; }
+.data-table td { padding:8px 10px; border-bottom:1px solid #1a1a2e; vertical-align:top; word-break:break-all; }
+.data-table tr:hover td { background:#1e1e30; }
+.data-table .badge-online { color:#2ecc71; }
+.data-table .badge-offline { color:#a0a0b8; }
+.data-table .expand-btn { background:none; border:none; color:#6c5ce7; cursor:pointer; font-size:11px; }
+.data-table .expand-btn:hover { text-decoration:underline; }
+
+.detail-row { display:none; }
+.detail-row.show { display:table-row; }
+.detail-cell { padding:10px 16px !important; background:#1a1a2e !important; }
+.detail-cell pre { font-size:10px; color:#a0a0b8; white-space:pre-wrap; max-height:180px; overflow-y:auto; }
+
+.msg-preview { padding:6px 10px; background:#1e1e30; border-radius:6px; margin-bottom:4px; font-size:12px; border-left:3px solid #6c5ce7; }
+.msg-preview .m-user { color:#6c5ce7; font-weight:600; font-size:10px; }
+.msg-preview .m-text { margin:2px 0; }
+.msg-preview .m-time { font-size:9px; color:#a0a0b8; }
+
+.keys-list { display:flex; flex-wrap:wrap; gap:3px; }
+.keys-list span { background:#1e1e30; padding:2px 6px; border-radius:4px; font-size:10px; color:#a0a0b8; border:1px solid #2a2a45; }
+.loading { text-align:center; padding:40px; color:#a0a0b8; }
+.loading i { font-size:28px; color:#6c5ce7; }
+
+.preview-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(250px,1fr)); gap:10px; }
+.preview-card { background:#1e1e30; border-radius:8px; padding:12px; border:1px solid #2a2a45; }
+.preview-card .pc-title { font-size:12px; color:#6c5ce7; font-weight:600; margin-bottom:4px; }
+.preview-card .pc-text { font-size:11px; color:#a0a0b8; }
+
+.filter-bar { display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap; }
+.filter-bar input, .filter-bar select { padding:8px 12px; border:1px solid #2a2a45; border-radius:6px; background:#1e1e30; color:#e8e8f0; font-size:12px; outline:none; }
+.filter-bar input:focus { border-color:#6c5ce7; }
+</style>
+</head>
+<body>
+<div id="loginPage">
+  <div class="login-box">
+    <div class="shield-icon"><i class="fas fa-shield-alt"></i></div>
+    <h1>Admin Panel</h1>
+    <p>Authorized access only</p>
+    <input type="email" id="loginEmail" value="hoss@host">
+    <input type="password" id="loginPass">
+    <button onclick="login()">Sign In</button>
+    <div class="login-error" id="loginError">Invalid credentials</div>
+  </div>
+</div>
+
+<div id="dashboard">
+  <div class="top-bar">
+    <h2><i class="fas fa-shield-alt"></i> Admin</h2>
+    <div class="stats">
+      <span>Online: <b id="statOnline">0</b></span>
+      <span>Users: <b id="statUsers">0</b></span>
+      <span>Rooms: <b id="statRooms">0</b></span>
+      <span>Messages: <b id="statMessages">0</b></span>
+      <span>Polls: <b id="statPolls">0</b></span>
+      <span>Reports: <b id="statReports">0</b></span>
+    </div>
+    <button class="logout-btn" onclick="logout()">Logout</button>
+  </div>
+
+  <div class="dashboard-nav">
+    <button class="active" data-panel="overview"><i class="fas fa-chart-pie"></i> Overview</button>
+    <button data-panel="users"><i class="fas fa-users"></i> Users</button>
+    <button data-panel="rooms"><i class="fas fa-layer-group"></i> Rooms</button>
+    <button data-panel="chats"><i class="fas fa-comments"></i> Chats</button>
+    <button data-panel="collected"><i class="fas fa-database"></i> Collected Data</button>
+    <button data-panel="polls"><i class="fas fa-poll"></i> Polls</button>
+    <button data-panel="reports"><i class="fas fa-flag"></i> Reports</button>
+    <button data-panel="streaks"><i class="fas fa-fire"></i> Streaks</button>
+    <button data-panel="feedback"><i class="fas fa-bug"></i> Feedback</button>
+    <button data-panel="activity"><i class="fas fa-activity"></i> Activity</button>
+  </div>
+
+  <div class="dashboard-content">
+    <div class="dashboard-panel active" id="panel-overview">
+      <div class="stat-grid">
+        <div class="stat-card"><div class="num" id="ovOnline">0</div><div class="label">Online</div></div>
+        <div class="stat-card"><div class="num" id="ovUsers">0</div><div class="label">Total Users</div></div>
+        <div class="stat-card"><div class="num" id="ovRooms">0</div><div class="label">Rooms</div></div>
+        <div class="stat-card"><div class="num" id="ovMessages">0</div><div class="label">Messages</div></div>
+        <div class="stat-card"><div class="num" id="ovPolls">0</div><div class="label">Polls</div></div>
+        <div class="stat-card"><div class="num" id="ovReports">0</div><div class="label">Reports</div></div>
+        <div class="stat-card"><div class="num" id="ovStreaks">0</div><div class="label">Streak Users</div></div>
+        <div class="stat-card"><div class="num" id="ovBookmarks">0</div><div class="label">Bookmarks</div></div>
+      </div>
+      <div class="card"><h3>Recently Active Users</h3><div id="recentUsers"></div></div>
+      <div class="card"><h3>Active Rooms</h3><div id="activeRooms"></div></div>
+    </div>
+
+    <div class="dashboard-panel" id="panel-users">
+      <div class="card">
+        <h3>All Users</h3>
+        <div class="filter-bar"><input type="text" id="userSearch" placeholder="Search users..." oninput="filterUsers()">
+          <select id="userStatusFilter" onchange="filterUsers()"><option value="">All</option><option value="online">Online</option><option value="offline">Offline</option></select></div>
+        <table class="data-table"><thead><tr><th>User</th><th>IP</th><th>Status</th><th>Location</th><th>Device</th><th>Streak</th><th>Data</th></tr></thead><tbody id="usersTableBody"></tbody></table>
+      </div>
+    </div>
+
+    <div class="dashboard-panel" id="panel-rooms">
+      <div class="card">
+        <h3>All Rooms</h3>
+        <table class="data-table"><thead><tr><th>Name</th><th>Type</th><th>Creator</th><th>Members</th><th>Mods</th><th>Slow</th><th>Pins</th><th>Messages</th><th>Created</th></tr></thead><tbody id="roomsTableBody"></tbody></table>
+      </div>
+    </div>
+
+    <div class="dashboard-panel" id="panel-chats">
+      <div class="card">
+        <h3>Chat Logs</h3>
+        <select id="chatRoomSelect" style="width:100%;padding:10px;margin-bottom:12px;border:1px solid #2a2a45;border-radius:6px;background:#1e1e30;color:#e8e8f0;font-size:13px;"></select>
+        <div id="chatMessages"></div>
+      </div>
+    </div>
+
+    <div class="dashboard-panel" id="panel-collected">
+      <div class="card">
+        <h3>Raw Collected Data (IP, Location, Device, Browser, Headers)</h3>
+        <div class="filter-bar"><input type="text" id="collectedSearch" placeholder="Search by user ID..." oninput="filterCollected()"></div>
+        <div id="collectedDataView"></div>
+      </div>
+    </div>
+
+    <div class="dashboard-panel" id="panel-polls">
+      <div class="card"><h3>All Polls</h3><div id="pollsView"></div></div>
+    </div>
+
+    <div class="dashboard-panel" id="panel-reports">
+      <div class="card"><h3>Reports</h3><div id="reportsView"></div></div>
+    </div>
+
+    <div class="dashboard-panel" id="panel-streaks">
+      <div class="card"><h3>User Streaks</h3><div id="streaksView"></div></div>
+    </div>
+
+    <div class="dashboard-panel" id="panel-feedback">
+      <div class="card"><h3>User Feedback</h3><div id="feedbackView"></div></div>
+    </div>
+
+    <div class="dashboard-panel" id="panel-activity">
+      <div class="card"><h3>User Activity</h3><div id="activityView"></div></div>
+    </div>
+  </div>
+</div>
+
+<script src="/host/js/admin.js"></script>
+</body>
+</html>

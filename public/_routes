@@ -1,0 +1,14 @@
+# Cloudflare Pages routing
+# All frontend routes served as static files
+# API and WebSocket routes are handled by the Pages Function middleware
+/api/* function
+/socket.io/* function
+/ws function
+/uploads/* function
+/host/* function
+/host function
+/admin/index.html static
+/js/config.js static
+/_headers static
+/_redirects static
+/* static
